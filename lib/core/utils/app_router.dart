@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_app/features/Login%20Screen/login_screen.dart';
-import 'package:restaurant_app/features/Main%20Screen/main_screen.dart';
+import 'package:restaurant_app/features/Menu%20Screen/menu_screen.dart';
 
 abstract class AppRouter {
   static const rLoginScreen = '/';
@@ -15,7 +15,7 @@ abstract class AppRouter {
       ),
       GoRoute(
         path: rMainScreen,
-        builder: (context, state) => const MainScreen(),
+        builder: (context, state) => const MenuScreen(),
       ),
     ],
   );

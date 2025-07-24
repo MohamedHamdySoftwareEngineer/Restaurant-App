@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_app/core/services/auth_service.dart';
+import 'package:restaurant_app/core/utils/constants.dart';
 import '../../core/utils/app_router.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -94,50 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const BrandLogo(),
                   const BrandName(),
-                  Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 25,
-                          offset: const Offset(0, 15),
-                        ),
-                      ],
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: const Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                           Text(
-                            'Welcome Back',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF5D4E37),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-
-                          SizedBox(height: 8),
-
-                          Text(
-                            'Please sign in to continue',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF8B7765),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-
-                          SizedBox(height: 40),
-                        ],
-                      ),
-                    ),
-                  ),
+                  loginCard(),
                 ],
               ),
             ),
@@ -172,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF5D4E37),
+                color: mainTextColor,
               ),
               textAlign: TextAlign.center,
             ),
@@ -196,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF5D4E37),
+                    color: mainTextColor,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -206,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   validator: _validateEmail,
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF5D4E37),
+                    color: mainTextColor,
                   ),
                   decoration: InputDecoration(
                     hintText: 'Enter your email',
@@ -226,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: const BorderSide(
-                        color: Color(0xFF8B5A3C),
+                        color: mainColor,
                         width: 2,
                       ),
                     ),
@@ -257,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF5D4E37),
+                    color: mainTextColor,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -267,7 +225,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   validator: _validatePassword,
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF5D4E37),
+                    color: mainTextColor,
                   ),
                   decoration: InputDecoration(
                     hintText: 'Enter your password',
@@ -300,7 +258,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: const BorderSide(
-                        color: Color(0xFF8B5A3C),
+                        color: mainColor,
                         width: 2,
                       ),
                     ),
@@ -328,14 +286,14 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [
-                    Color(0xFF8B5A3C), // Warm brown
-                    Color(0xFFA06B47), // Lighter brown
+                    mainColor, 
+                    secondColor, 
                   ],
                 ),
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF8B5A3C).withOpacity(0.3),
+                    color: mainColor.withOpacity(0.3),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   ),
@@ -391,7 +349,7 @@ class BrandName extends StatelessWidget {
           style: TextStyle(
             fontSize: 42,
             fontWeight: FontWeight.w300,
-            color: Color(0xFF5D4E37), // Dark olive
+            color: mainTextColor, // Dark olive
             letterSpacing: 2,
           ),
         ),
@@ -401,7 +359,7 @@ class BrandName extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF8B5A3C),
+            color: mainColor,
             letterSpacing: 4,
           ),
         ),
@@ -434,7 +392,7 @@ class BrandLogo extends StatelessWidget {
       child: const Icon(
         Icons.restaurant,
         size: 60,
-        color: Color(0xFF8B5A3C), // Warm brown
+        color: mainColor, // Warm brown
       ),
     );
   }
