@@ -3,62 +3,51 @@ import 'package:flutter/material.dart';
 import 'package:restaurant_app/core/utils/constants.dart';
 
 import '../../core/models/food_item.dart';
+import '../Cart Screen/cart_screen.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
-
   @override
   State<MenuScreen> createState() => _MenuScreenState();
 }
 
 class _MenuScreenState extends State<MenuScreen> {
-  // // Sample food data with network images
-  // final List<FoodItem> foodItems = [
-  //   FoodItem(
-  //     name: 'Grilled Salmon',
-  //     price: 24.99,
-  //     image:
-  //         'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=400&fit=crop',
-  //   ),
-  //   FoodItem(
-  //     name: 'Margherita Pizza',
-  //     price: 18.50,
-  //     image:
-  //         'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400&h=400&fit=crop',
-  //   ),
-  //   FoodItem(
-  //     name: 'Caesar Salad',
-  //     price: 12.99,
-  //     image:
-  //         'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=400&fit=crop',
-  //   ),
-  //   FoodItem(
-  //     name: 'Beef Burger',
-  //     price: 16.75,
-  //     image:
-  //         'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=400&fit=crop',
-  //   ),
-  //   FoodItem(
-  //     name: 'Chicken Pasta',
-  //     price: 19.25,
-  //     image:
-  //         'https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=400&h=400&fit=crop',
-  //   ),
-  //   FoodItem(
-  //     name: 'Chocolate Cake',
-  //     price: 8.99,
-  //     image:
-  //         'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop',
-  //   ),
-  // ];
+  List<FoodItem> _cart = [];
+
+  void _addToCart(FoodItem item) {
+    setState(() => _cart.add(item));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MyAppBar(),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text('Our Menu', style: TextStyle(color: mainTextColor)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart_outlined, color: mainColor),
+            onPressed: () async {
+              // Open cart and await updated list
+              final updated = await Navigator.push<List<FoodItem>>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CartScreen(initialCart: _cart),
+                ),
+              );
+              if (updated != null) {
+                setState(() => _cart = updated);
+              }
+            },
+          ),
+          const SizedBox(width: 12),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
               const SizedBox(height: 20),
@@ -66,39 +55,30 @@ class _MenuScreenState extends State<MenuScreen> {
               const SizedBox(height: 30),
               const SectionTitle(),
               const SizedBox(height: 20),
-              // Food Items Grid
-              StreamBuilder<QuerySnapshot>(
-                stream:
-                    FirebaseFirestore.instance
-                        .collection('foodItems')
-                        .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(child: Text('No Items Found!'));
-                  }
-                  final foodItems =
-                      snapshot.data!.docs
-                          .map((doc) => FoodItem.fromFirestore(doc))
-                          .toList();
-                  return Expanded(
-                    child: GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.75,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                          ),
-                      itemCount: foodItems.length,
-                      itemBuilder: (context, index) {
-                        return FoodItemCard(foodItem: foodItems[index]);
-                      },
-                    ),
-                  );
-                },
+              Expanded(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance.collection('foodItems').snapshots(),
+                  builder: (ctx, snap) {
+                    if (snap.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (!snap.hasData || snap.data!.docs.isEmpty) {
+                      return const Center(child: Text('No Items Found!'));
+                    }
+                    final items = snap.data!.docs
+                        .map((d) => FoodItem.fromFirestore(d))
+                        .toList();
+                    return GridView.builder(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2, childAspectRatio: .75, crossAxisSpacing: 16, mainAxisSpacing: 16),
+                      itemCount: items.length,
+                      itemBuilder: (ctx, i) => FoodItemCard(
+                        foodItem: items[i],
+                        onAdd: () => _addToCart(items[i]),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -107,6 +87,7 @@ class _MenuScreenState extends State<MenuScreen> {
     );
   }
 }
+
 
 class SectionTitle extends StatelessWidget {
   const SectionTitle({super.key});
@@ -183,7 +164,14 @@ class WelcomeSection extends StatelessWidget {
 }
 
 class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const MyAppBar({super.key});
+  final ValueNotifier<int> cartCountNotifier;
+  final VoidCallback onCartPressed;
+
+  const MyAppBar({
+    super.key,
+    required this.cartCountNotifier,
+    required this.onCartPressed,
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -219,15 +207,49 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ],
           ),
-          child: IconButton(
-            icon: const Icon(
-              Icons.shopping_cart_outlined,
-              color: mainColor, // Dark brown
-              size: 20,
-            ),
-            onPressed: () {
-              // Cart functionality
-            },
+          child: Stack(
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.shopping_cart_outlined,
+                  color: mainColor,
+                  size: 20,
+                ),
+                onPressed: onCartPressed,
+              ),
+              // Cart badge - Only this will update when cart changes
+              ValueListenableBuilder<int>(
+                valueListenable: cartCountNotifier,
+                builder: (context, cartCount, child) {
+                  if (cartCount <= 0) return const SizedBox.shrink();
+                  
+                  return Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        cartCount > 99 ? '99+' : '$cartCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ],
@@ -237,8 +259,13 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 class FoodItemCard extends StatelessWidget {
   final FoodItem foodItem;
+  final VoidCallback onAdd;
 
-  const FoodItemCard({super.key, required this.foodItem});
+  const FoodItemCard({
+    super.key,
+    required this.foodItem,
+    required this.onAdd,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -268,7 +295,6 @@ class FoodItemCard extends StatelessWidget {
                   topRight: Radius.circular(20),
                 ),
               ),
-              // ClipRRect to ensure the image fits within the rounded corners
               child: ClipRRect(
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(20),
@@ -364,9 +390,7 @@ class FoodItemCard extends StatelessWidget {
                         ),
                         child: IconButton(
                           padding: EdgeInsets.zero,
-                          onPressed: () {
-                            // TODO Handle add to cart functionality
-                          },
+                          onPressed: onAdd,
                           icon: const Icon(
                             Icons.add,
                             color: Colors.white,

@@ -11,7 +11,4 @@ class AuthService {
     return userCredential.user;
   }
 
-  Future<void> signOut() {
-    return auth.signOut();
-  }
 }
