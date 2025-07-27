@@ -61,15 +61,7 @@ The app follows **Clean Architecture** principles with organized folder structur
 - **Scalability** - Modular design for future feature additions
 - **Firebase Integration** - Seamless backend connectivity
 
-```
-lib/
-├── screens/           # UI screens (Login, Menu, Cart)
-├── services/          # Firebase services and API calls
-├── widgets/           # Reusable UI components
-├── models/            # Data models and structures
-├── utils/             # Helper functions and constants
-└── main.dart          # App entry point
-```
+> ![App Structure](assets/AppImages/Hirearchy.png)
 
 ## 🚀 Upcoming Features
 
@@ -86,17 +78,22 @@ lib/
   <table>
     <tr>
       <td align="center">
-        <img src="assets/images/login_screen.png" width="300" alt="Login Screen"/>
+        <img src="assets/AppImages/Login Page.png" width="300" alt="Login Screen"/>
         <br/>
         <sub><b>Secure Login</b></sub>
       </td>
       <td align="center">
-        <img src="assets/images/menu_screen.png" width="300" alt="Menu Screen"/>
+        <img src="assets/AppImages/Menu Page.png" width="300" alt="Menu Screen"/>
         <br/>
         <sub><b>Dynamic Menu</b></sub>
       </td>
       <td align="center">
-        <img src="assets/images/cart_screen.png" width="300" alt="Cart Screen"/>
+        <img src="assets/AppImages/Cart Page1.png" width="300" alt="Cart Screen"/>
+        <br/>
+        <sub><b>Smart Cart</b></sub>
+      </td>
+      <td align="center">
+        <img src="assets/AppImages/Cart Page2.png" width="300" alt="Cart Screen"/>
         <br/>
         <sub><b>Smart Cart</b></sub>
       </td>
