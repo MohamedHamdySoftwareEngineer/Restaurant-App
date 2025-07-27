@@ -288,11 +288,14 @@ class FoodItemCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Food Image
-          Expanded(
+          // Food Image - Use Flexible instead of Expanded with flex
+          Flexible(
             flex: 3,
             child: Container(
               width: double.infinity,
+              constraints: const BoxConstraints(
+                minHeight: 120, // Ensure minimum height
+              ),
               decoration: const BoxDecoration(
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20),
@@ -342,32 +345,39 @@ class FoodItemCard extends StatelessWidget {
             ),
           ),
 
-          // Food Details
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+          // Food Details - Use a Container with constraints instead of Expanded
+          Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(
+              minHeight: 80, // Ensure minimum height for content
+            ),
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
                     foodItem.name,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: mainTextColor,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                ),
 
-                  const SizedBox(height: 4),
+                const SizedBox(height: 8), // Slightly more space
 
-                  // Price and Add Button Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
+                // Price and Add Button Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Text(
                         '\$${foodItem.price.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 18,
@@ -375,37 +385,37 @@ class FoodItemCard extends StatelessWidget {
                           color: mainColor,
                         ),
                       ),
+                    ),
 
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [mainColor, secondColor],
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: mainColor.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [mainColor, secondColor],
                         ),
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          onPressed: onAdd,
-                          icon: const Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: 18,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: mainColor.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
                           ),
+                        ],
+                      ),
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: onAdd,
+                        icon: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                          size: 18,
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
