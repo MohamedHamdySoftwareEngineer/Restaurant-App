@@ -60,7 +60,8 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-
+      // If login is successful, navigate to the main screen
+      // mounted check is used to ensure the widget is still in the tree
       if (mounted) {
         AppRouter.toMainScreen(context);
       } else {

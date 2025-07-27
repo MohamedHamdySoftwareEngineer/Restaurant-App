@@ -20,67 +20,71 @@ class _MenuScreenState extends State<MenuScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text('Our Menu', style: TextStyle(color: mainTextColor)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined, color: mainColor),
-            onPressed: () async {
-              // Open cart and await updated list
-              final updated = await Navigator.push<List<FoodItem>>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CartScreen(initialCart: _cart),
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          scrolledUnderElevation: 0,
+          elevation: 0,
+          centerTitle: true,
+          title: const Text('Our Menu', style: TextStyle(color: mainTextColor)),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.shopping_cart_outlined, color: mainColor),
+              onPressed: () async {
+                // Open cart and await updated list
+                final updated = await Navigator.push<List<FoodItem>>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CartScreen(initialCart: _cart),
+                  ),
+                );
+                if (updated != null) {
+                  setState(() => _cart = updated);
+                }
+              },
+            ),
+            const SizedBox(width: 12),
+          ],
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                const WelcomeSection(),
+                const SizedBox(height: 30),
+                const SectionTitle(),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance.collection('foodItems').snapshots(),
+                    builder: (ctx, snap) {
+                      if (snap.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (!snap.hasData || snap.data!.docs.isEmpty) {
+                        return const Center(child: Text('No Items Found!'));
+                      }
+                      final items = snap.data!.docs
+                          .map((d) => FoodItem.fromFirestore(d))
+                          .toList();
+                      return GridView.builder(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2, childAspectRatio: .75, crossAxisSpacing: 16, mainAxisSpacing: 16),
+                        itemCount: items.length,
+                        itemBuilder: (ctx, i) => FoodItemCard(
+                          foodItem: items[i],
+                          onAdd: () => _addToCart(items[i]),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              );
-              if (updated != null) {
-                setState(() => _cart = updated);
-              }
-            },
-          ),
-          const SizedBox(width: 12),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              const WelcomeSection(),
-              const SizedBox(height: 30),
-              const SectionTitle(),
-              const SizedBox(height: 20),
-              Expanded(
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection('foodItems').snapshots(),
-                  builder: (ctx, snap) {
-                    if (snap.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (!snap.hasData || snap.data!.docs.isEmpty) {
-                      return const Center(child: Text('No Items Found!'));
-                    }
-                    final items = snap.data!.docs
-                        .map((d) => FoodItem.fromFirestore(d))
-                        .toList();
-                    return GridView.builder(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, childAspectRatio: .75, crossAxisSpacing: 16, mainAxisSpacing: 16),
-                      itemCount: items.length,
-                      itemBuilder: (ctx, i) => FoodItemCard(
-                        foodItem: items[i],
-                        onAdd: () => _addToCart(items[i]),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
