@@ -1,4 +1,4 @@
-# 🍽️ RestaurantApp
+# 🍽️ RestaurantApp (Reco Genie Internship Task)
 ### Modern Mobile Dining Experience for Food Lovers
 
 <div align="center">
