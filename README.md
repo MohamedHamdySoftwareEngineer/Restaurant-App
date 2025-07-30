@@ -77,6 +77,11 @@ The app follows **Clean Architecture** principles with organized folder structur
 <div align="center">
   <table>
     <tr>
+    <td align="center">
+        <img src="assets/AppImages/SplashScreen.png" width="300" alt="Login Screen"/>
+        <br/>
+        <sub><b>Secure Login</b></sub>
+      </td>
       <td align="center">
         <img src="assets/AppImages/Login Page.png" width="300" alt="Login Screen"/>
         <br/>
