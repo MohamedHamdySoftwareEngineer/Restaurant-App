@@ -28,4 +28,6 @@ abstract class AppRouter {
 
   static Future<T?> toMainScreen<T>(BuildContext context) =>
       context.push<T>(rMainScreen);
+  static Future<T?> toLoginScreen<T>(BuildContext context) =>
+      context.push<T>(rLoginScreen);
 }

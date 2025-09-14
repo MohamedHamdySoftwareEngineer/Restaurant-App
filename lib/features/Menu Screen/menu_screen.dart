@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:restaurant_app/core/utils/constants.dart';
-
 import '../../core/models/food_item.dart';
 import '../Cart Screen/cart_screen.dart';
 
@@ -12,10 +11,29 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> {
-  List<FoodItem> _cart = [];
+  final List<FoodItem> _cart = [];
+  final ValueNotifier<int> _cartCountNotifier = ValueNotifier<int>(0);
 
   void _addToCart(FoodItem item) {
-    setState(() => _cart.add(item));
+    _cart.add(item);
+    _cartCountNotifier.value = _cart.length;
+    // Don't call setState() here to avoid rebuilding the entire widget
+    
+    // Optional: Show a quick feedback without full rebuild
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${item.name} added to cart'),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: mainColor,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _cartCountNotifier.dispose();
+    super.dispose();
   }
 
   @override
@@ -30,20 +48,79 @@ class _MenuScreenState extends State<MenuScreen> {
           centerTitle: true,
           title: const Text('Our Menu', style: TextStyle(color: mainTextColor)),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.shopping_cart_outlined, color: mainColor),
-              onPressed: () async {
-                // Open cart and await updated list
-                final updated = await Navigator.push<List<FoodItem>>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CartScreen(initialCart: _cart),
+            // Cart icon with badge that updates independently
+            Container(
+              margin: const EdgeInsets.only(right: 16),
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
                   ),
-                );
-                if (updated != null) {
-                  setState(() => _cart = updated);
-                }
-              },
+                ],
+              ),
+              child: Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.shopping_cart_outlined,
+                      color: mainColor,
+                      size: 20,
+                    ),
+                    onPressed: () async {
+                      // Open cart and await updated list
+                      final updated = await Navigator.push<List<FoodItem>>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CartScreen(initialCart: _cart),
+                        ),
+                      );
+                      if (updated != null) {
+                        _cart.clear();
+                        _cart.addAll(updated);
+                        _cartCountNotifier.value = _cart.length;
+                      }
+                    },
+                  ),
+                  // Cart badge - Only this will update when cart changes
+                  ValueListenableBuilder<int>(
+                    valueListenable: _cartCountNotifier,
+                    builder: (context, cartCount, child) {
+                      if (cartCount <= 0) return const SizedBox.shrink();
+                      
+                      return Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            cartCount > 99 ? '99+' : '$cartCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
             const SizedBox(width: 12),
           ],
@@ -72,10 +149,17 @@ class _MenuScreenState extends State<MenuScreen> {
                           .map((d) => FoodItem.fromFirestore(d))
                           .toList();
                       return GridView.builder(
+                        // Add this key to prevent unnecessary rebuilds
+                        key: const ValueKey('food_grid'),
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2, childAspectRatio: .75, crossAxisSpacing: 16, mainAxisSpacing: 16),
+                          crossAxisCount: 2, 
+                          childAspectRatio: .75, 
+                          crossAxisSpacing: 16, 
+                          mainAxisSpacing: 16
+                        ),
                         itemCount: items.length,
                         itemBuilder: (ctx, i) => FoodItemCard(
+                          key: ValueKey(items[i]), // Add unique key for each item
                           foodItem: items[i],
                           onAdd: () => _addToCart(items[i]),
                         ),
@@ -91,7 +175,6 @@ class _MenuScreenState extends State<MenuScreen> {
     );
   }
 }
-
 
 class SectionTitle extends StatelessWidget {
   const SectionTitle({super.key});
@@ -167,101 +250,7 @@ class WelcomeSection extends StatelessWidget {
   }
 }
 
-class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final ValueNotifier<int> cartCountNotifier;
-  final VoidCallback onCartPressed;
-
-  const MyAppBar({
-    super.key,
-    required this.cartCountNotifier,
-    required this.onCartPressed,
-  });
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      scrolledUnderElevation: 0,
-      elevation: 0,
-      title: const Text(
-        'Our Menu',
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w600,
-          color: mainTextColor,
-        ),
-      ),
-      centerTitle: true,
-      actions: [
-        Container(
-          margin: const EdgeInsets.only(right: 16),
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.shopping_cart_outlined,
-                  color: mainColor,
-                  size: 20,
-                ),
-                onPressed: onCartPressed,
-              ),
-              // Cart badge - Only this will update when cart changes
-              ValueListenableBuilder<int>(
-                valueListenable: cartCountNotifier,
-                builder: (context, cartCount, child) {
-                  if (cartCount <= 0) return const SizedBox.shrink();
-                  
-                  return Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      child: Text(
-                        cartCount > 99 ? '99+' : '$cartCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class FoodItemCard extends StatelessWidget {
+class FoodItemCard extends StatefulWidget {
   final FoodItem foodItem;
   final VoidCallback onAdd;
 
@@ -270,6 +259,30 @@ class FoodItemCard extends StatelessWidget {
     required this.foodItem,
     required this.onAdd,
   });
+
+  @override
+  State<FoodItemCard> createState() => _FoodItemCardState();
+}
+
+class _FoodItemCardState extends State<FoodItemCard> {
+  bool _isAdding = false;
+
+  void _handleAdd() async {
+    setState(() {
+      _isAdding = true;
+    });
+    
+    widget.onAdd();
+    
+    // Small delay to show the animation
+    await Future.delayed(const Duration(milliseconds: 300));
+    
+    if (mounted) {
+      setState(() {
+        _isAdding = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -288,13 +301,13 @@ class FoodItemCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Food Image - Use Flexible instead of Expanded with flex
+          // Food Image
           Flexible(
             flex: 3,
             child: Container(
               width: double.infinity,
               constraints: const BoxConstraints(
-                minHeight: 120, // Ensure minimum height
+                minHeight: 120,
               ),
               decoration: const BoxDecoration(
                 borderRadius: BorderRadius.only(
@@ -308,7 +321,7 @@ class FoodItemCard extends StatelessWidget {
                   topRight: Radius.circular(20),
                 ),
                 child: Image.network(
-                  foodItem.image,
+                  widget.foodItem.image,
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
@@ -345,11 +358,11 @@ class FoodItemCard extends StatelessWidget {
             ),
           ),
 
-          // Food Details - Use a Container with constraints instead of Expanded
+          // Food Details
           Container(
             width: double.infinity,
             constraints: const BoxConstraints(
-              minHeight: 80, // Ensure minimum height for content
+              minHeight: 80,
             ),
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -358,7 +371,7 @@ class FoodItemCard extends StatelessWidget {
               children: [
                 Flexible(
                   child: Text(
-                    foodItem.name,
+                    widget.foodItem.name,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -369,7 +382,7 @@ class FoodItemCard extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 8), // Slightly more space
+                const SizedBox(height: 8),
 
                 // Price and Add Button Row
                 Row(
@@ -378,7 +391,7 @@ class FoodItemCard extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        '\$${foodItem.price.toStringAsFixed(2)}',
+                        '\$${widget.foodItem.price.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -387,17 +400,20 @@ class FoodItemCard extends StatelessWidget {
                       ),
                     ),
 
-                    Container(
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [mainColor, secondColor],
+                        gradient: LinearGradient(
+                          colors: _isAdding 
+                            ? [Colors.green, Colors.green.shade600]
+                            : [mainColor, secondColor],
                         ),
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
-                            color: mainColor.withOpacity(0.3),
+                            color: (_isAdding ? Colors.green : mainColor).withOpacity(0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -405,11 +421,22 @@ class FoodItemCard extends StatelessWidget {
                       ),
                       child: IconButton(
                         padding: EdgeInsets.zero,
-                        onPressed: onAdd,
-                        icon: const Icon(
-                          Icons.add,
-                          color: Colors.white,
-                          size: 18,
+                        onPressed: _isAdding ? null : _handleAdd,
+                        icon: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          child: _isAdding
+                            ? const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 18,
+                                key: ValueKey('check'),
+                              )
+                            : const Icon(
+                                Icons.add,
+                                color: Colors.white,
+                                size: 18,
+                                key: ValueKey('add'),
+                              ),
                         ),
                       ),
                     ),

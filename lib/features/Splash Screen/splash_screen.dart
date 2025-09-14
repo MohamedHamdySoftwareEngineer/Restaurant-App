@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_app/core/utils/constants.dart';
 import 'dart:async';
-
 import '../../core/utils/app_router.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -33,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
 
     Timer(const Duration(milliseconds: 4000), () {
-      AppRouter.toMainScreen(context);
+      AppRouter.toLoginScreen(context);
     });
   }
 
@@ -110,8 +109,6 @@ class _SplashScreenState extends State<SplashScreen>
                     ],
                   ),
                 ),
-
-                
               ],
             );
           },

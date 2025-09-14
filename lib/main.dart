@@ -5,7 +5,7 @@ import 'package:restaurant_app/core/utils/constants.dart';
 
 void main() async {
   // Ensure that plugin services are initialized before using them
-  WidgetsFlutterBinding.ensureInitialized(); // Intialize Firebase
+  WidgetsFlutterBinding.ensureInitialized(); 
   await Firebase.initializeApp(); // Intialize Firebase
   runApp(const MyApp());
 }
