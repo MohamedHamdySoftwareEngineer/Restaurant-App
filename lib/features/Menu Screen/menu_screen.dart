@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:restaurant_app/core/utils/constants.dart';
 import '../../core/models/food_item.dart';
+import '../../core/utils/app_router.dart';
 import '../Cart Screen/cart_screen.dart';
 
 class MenuScreen extends StatefulWidget {
@@ -74,12 +75,7 @@ class _MenuScreenState extends State<MenuScreen> {
                     ),
                     onPressed: () async {
                       // Open cart and await updated list
-                      final updated = await Navigator.push<List<FoodItem>>(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => CartScreen(initialCart: _cart),
-                        ),
-                      );
+                      final updated = await AppRouter.toCartScreen(context,_cart);
                       if (updated != null) {
                         _cart.clear();
                         _cart.addAll(updated);
