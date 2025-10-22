@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:restaurant_app/features/Login%20Screen/login_screen.dart';
-import 'package:restaurant_app/features/Menu%20Screen/menu_screen.dart';
+import 'package:restaurant_app/features/Login/login_screen.dart';
+import 'package:restaurant_app/features/Menu/menu_screen.dart';
 
-import '../../features/Cart Screen/cart_screen.dart';
-import '../../features/Splash Screen/splash_screen.dart';
+import '../../features/Cart/cart_screen.dart';
+import '../../features/Splash/splash_screen.dart';
 import '../models/food_item.dart';
 
 abstract class AppRouter {
