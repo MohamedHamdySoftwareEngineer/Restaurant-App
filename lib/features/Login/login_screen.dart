@@ -139,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 8),
 
             const Text(
-              'Please sign in to continue',
+              'Please log in to continue',
               style: TextStyle(fontSize: 14, color: Color(0xFF8B7765)),
               textAlign: TextAlign.center,
             ),
@@ -320,7 +320,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         )
                         : const Text(
-                          'Sign In',
+                          'Log In',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
